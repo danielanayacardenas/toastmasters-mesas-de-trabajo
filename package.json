@@ -1,0 +1,10 @@
+{
+  "name": "toastmasters-guadalajara-calendario",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun run src/build.ts",
+    "dev": "bun run build && bun run src/serve.ts"
+  }
+}

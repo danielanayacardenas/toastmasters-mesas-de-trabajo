@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toastmasters Guadalajara — Calendario de Participaciones</title>
+  <meta
+    name="description"
+    content="Consulta tus próximas participaciones de Toastmasters Guadalajara y descarga un calendario con recordatorios."
+  />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#004165" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Source+Sans+3:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    :root {
+      --loyal-blue: #004165;
+      --loyal-blue-deep: #002f47;
+      --maroon: #772432;
+      --maroon-deep: #5a1c26;
+       --cool-gray: #5b6870;
+       --focus: #765f00;
+      --joyful-yellow: #f2df74;
+      --fair-gray: #f5f5f5;
+      --ink: #11202b;
+      --ink-soft: #42525d;
+      --card: #ffffff;
+      --border: #e2e6ea;
+      --font-heading: "Montserrat", Arial, "Segoe UI", sans-serif;
+      --font-body: "Source Sans 3", Arial, "Segoe UI", sans-serif;
+      color-scheme: light;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      background: var(--fair-gray);
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.55;
+    }
+    a { color: var(--loyal-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .skip-link {
+      position: absolute; left: 1rem; top: -4rem; z-index: 10;
+      background: var(--ink); color: #fff; padding: 0.7rem 1rem;
+      border-radius: 0 0 8px 8px; font-family: var(--font-heading); font-weight: 600;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* Header */
+    .site-header {
+      background: linear-gradient(135deg, var(--loyal-blue) 0%, var(--loyal-blue-deep) 100%);
+      color: #fff;
+      padding: 2.5rem 1.25rem 2rem;
+      border-bottom: 4px solid var(--joyful-yellow);
+    }
+    .site-header__inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .logo {
+      width: 96px; height: 96px; flex: 0 0 auto;
+      display: flex; align-items: center; justify-content: center;
+      background: #fff; border-radius: 16px;
+      border: 2px solid var(--joyful-yellow);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    }
+    .logo--placeholder {
+      font-family: var(--font-heading); color: var(--loyal-blue);
+      font-weight: 700; font-size: 0.78rem; letter-spacing: 0.04em;
+      text-align: center; padding: 0.4rem; line-height: 1.2;
+    }
+    .site-title {
+      font-family: var(--font-heading); font-weight: 700;
+      font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+      margin: 0 0 0.3rem; line-height: 1.15;
+    }
+    .site-subtitle {
+      margin: 0; font-size: 1rem;
+      color: rgba(255,255,255,0.85); letter-spacing: 0.02em;
+    }
+
+    /* Layout */
+    main {
+      max-width: 960px; margin: 0 auto;
+      padding: 2rem 1.25rem 3rem; display: grid; gap: 1.5rem;
+    }
+    section.card {
+      background: var(--card); border-radius: 16px;
+      border: 1px solid var(--border); padding: 1.5rem;
+      box-shadow: 0 4px 14px rgba(0,65,101,0.06);
+    }
+    section.card h2 {
+      font-family: var(--font-heading); font-weight: 600;
+      font-size: 1.15rem; margin: 0 0 0.5rem; color: var(--loyal-blue);
+    }
+    section.card p.lede {
+      margin: 0 0 1.25rem; color: var(--ink-soft);
+    }
+
+    /* Form */
+    form { display: grid; gap: 1rem; }
+    .field { display: grid; gap: 0.35rem; }
+    .field label {
+      font-family: var(--font-heading); font-size: 0.85rem;
+      letter-spacing: 0.04em; color: var(--loyal-blue);
+      text-transform: uppercase; font-weight: 600;
+    }
+    select {
+      width: 100%; padding: 0.75rem 0.9rem; font-size: 1rem;
+      font-family: inherit; border-radius: 10px;
+      border: 1px solid var(--border); background: #fff; color: var(--ink);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    select:focus, button:focus-visible {
+       outline: 3px solid var(--focus); outline-offset: 2px;
+       border-color: var(--loyal-blue);
+    }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+
+    .btn {
+      font-family: var(--font-heading); font-weight: 600;
+      letter-spacing: 0.03em; font-size: 0.95rem;
+      padding: 0.85rem 1.4rem; border-radius: 10px;
+      border: 2px solid transparent; cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.05s;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn--primary {
+      background: var(--maroon); color: #fff; border-color: var(--maroon);
+    }
+    .btn--primary:hover:enabled { background: var(--maroon-deep); border-color: var(--maroon-deep); }
+    .btn--secondary {
+      background: transparent; color: var(--loyal-blue); border-color: var(--loyal-blue);
+    }
+    .btn--secondary:hover:enabled { background: var(--loyal-blue); color: #fff; }
+    .btn--ghost {
+      background: transparent; color: var(--cool-gray); border-color: var(--cool-gray);
+      font-size: 0.85rem; padding: 0.6rem 1rem;
+    }
+    .btn--ghost:hover:enabled { background: var(--cool-gray); color: #fff; }
+
+    .status {
+      min-height: 1.2rem; font-size: 0.92rem;
+      color: var(--ink-soft); margin-top: 0.25rem;
+    }
+    .status[data-kind="error"] { color: #b3261e; }
+    .status[data-kind="ok"] { color: #1a7a3a; }
+
+    .meta { font-size: 0.82rem; color: var(--cool-gray); margin-top: 0.25rem; }
+
+    /* Results */
+    .results h2 { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.2rem 0.65rem; border-radius: 999px;
+      font-size: 0.78rem; font-family: var(--font-heading);
+      font-weight: 600; letter-spacing: 0.04em;
+    }
+    .badge--speech { background: rgba(119,36,50,0.12); color: var(--maroon-deep); }
+    .badge--role { background: rgba(0,65,101,0.12); color: var(--loyal-blue-deep); }
+    .badge--reminder { background: rgba(242,223,116,0.45); }
+
+    .next-event {
+      margin: 1.25rem 0 1.5rem; padding: 1rem 1.1rem;
+      border-left: 5px solid var(--joyful-yellow); border-radius: 10px;
+      background: #fffbea; box-shadow: 0 4px 12px rgba(119,36,50,0.08);
+    }
+    .next-event__label {
+      margin: 0 0 0.25rem; color: var(--maroon-deep); font-family: var(--font-heading);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .next-event__role { display: block; font-family: var(--font-heading); font-size: 1.15rem; }
+    .next-event__date { display: block; color: var(--ink-soft); margin-top: 0.2rem; }
+
+    .results h3 {
+      display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+      font-family: var(--font-heading); font-size: 1rem; margin: 1.5rem 0 0.3rem;
+    }
+    .results h3.speech-heading { color: var(--maroon-deep); }
+    .results h3.role-heading { color: var(--loyal-blue-deep); }
+
+    ul.participaciones {
+      list-style: none; padding: 0; margin: 1rem 0 0;
+      display: grid; gap: 0.5rem;
+    }
+    ul.participaciones li.item {
+      display: flex; justify-content: space-between;
+      align-items: center; gap: 1rem; padding: 0.85rem 1rem;
+      border-radius: 10px; border: 1px solid var(--border); background: #fff;
+    }
+    ul.participaciones li.speech { border-left: 4px solid var(--maroon); background: #fdf3f4; }
+    ul.participaciones li.role { border-left: 4px solid var(--loyal-blue); background: #f1f6f9; }
+    ul.participaciones li .text { font-weight: 600; color: var(--ink); }
+    ul.participaciones li .date { font-size: 0.9rem; color: var(--ink-soft); text-align: right; }
+    ul.participaciones li.empty { color: var(--ink-soft); font-style: italic; background: transparent; border-style: dashed; }
+
+    /* Footer */
+    .site-footer {
+      background: var(--loyal-blue-deep); color: rgba(255,255,255,0.78);
+      padding: 2rem 1.25rem; border-top: 4px solid var(--maroon);
+    }
+    .site-footer__inner { max-width: 960px; margin: 0 auto; display: grid; gap: 1rem; }
+    .site-footer p { margin: 0; font-size: 0.85rem; line-height: 1.6; }
+    .site-footer .notice {
+      border-left: 3px solid var(--joyful-yellow); padding-left: 0.9rem;
+      color: rgba(255,255,255,0.92);
+    }
+    .site-footer small { display: block; margin-top: 0.5rem; opacity: 0.75; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .site-header { padding: 1.5rem 1rem 1.25rem; }
+      .site-header__inner { gap: 1rem; }
+      .logo { width: 72px; height: 72px; border-radius: 12px; }
+      .site-title { font-size: 1.3rem; }
+      main { padding: 1.25rem 1rem 2rem; gap: 1rem; }
+      section.card { padding: 1.1rem; }
+      ul.participaciones li.item { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+      ul.participaciones li .date { text-align: left; }
+      .actions .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+  <header class="site-header" role="banner">
+    <div class="site-header__inner">
+      <div class="logo" id="logo" role="img" aria-label="Toastmasters International">
+        <span class="logo--placeholder">TOASTMASTERS<br />INTERNATIONAL</span>
+      </div>
+      <div>
+        <h1 class="site-title">Toastmasters Guadalajara</h1>
+        <p class="site-subtitle">Tus próximas asignaciones, con descarga para cualquier calendario.</p>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" tabindex="-1">
+    <section class="card" aria-labelledby="selecciona">
+      <h2 id="selecciona">Selecciona tu nombre</h2>
+      <p class="lede">
+        Consulta tus próximas participaciones y descarga un calendario con
+        recordatorios automáticos para tus discursos y roles.
+      </p>
+
+      <form id="form" autocomplete="off">
+        <div class="field">
+          <label for="persona">Persona</label>
+          <select id="persona" name="persona" aria-describedby="status" disabled>
+            <option value="">Cargando…</option>
+          </select>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="descargar" class="btn btn--primary" disabled>Descargar calendario (.ics)</button>
+          <button type="button" id="actualizar" class="btn btn--ghost">Actualizar calendario</button>
+        </div>
+
+        <p class="status" id="status" role="status" aria-live="polite" aria-atomic="true"></p>
+        <p class="meta" id="last-update"></p>
+      </form>
+    </section>
+
+    <section class="card results" id="resultados" hidden tabindex="-1" aria-live="polite" aria-labelledby="resultados-titulo">
+      <h2 id="resultados-titulo">Tus participaciones</h2>
+      <div class="next-event" id="proxima" hidden>
+        <p class="next-event__label">Próxima participación</p>
+        <strong class="next-event__role" id="proxima-rol"></strong>
+        <span class="next-event__date" id="proxima-fecha"></span>
+      </div>
+      <h3 class="speech-heading">
+        Discursos
+        <span class="badge badge--speech badge--reminder" id="resumen-discursos">0 discursos</span>
+        <span class="badge badge--speech badge--reminder">ICS: 2 semanas antes</span>
+      </h3>
+      <ul class="participaciones" id="discursos"></ul>
+
+      <h3 class="role-heading">
+        Roles en mesa de trabajo
+        <span class="badge badge--role badge--reminder" id="resumen-roles">0 roles</span>
+        <span class="badge badge--role badge--reminder">ICS: 1 semana antes</span>
+      </h3>
+      <ul class="participaciones" id="roles"></ul>
+    </section>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="site-footer__inner">
+      <p class="notice">
+        <span lang="en">The information on this website is for the sole use of Toastmasters&rsquo; members,
+        for Toastmasters business only. It is not to be used for solicitation and distribution
+        of non-Toastmasters material or information.</span>
+      </p>
+      <p>
+        Aplicación para socios de Toastmasters Guadalajara. Cumple con las
+        <a href="https://www.toastmasters.org/" style="color:var(--joyful-yellow);">pautas de marca</a>
+        y el manual oficial de Toastmasters International. &copy; <span id="year">2025</span>.
+      </p>
+    </div>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

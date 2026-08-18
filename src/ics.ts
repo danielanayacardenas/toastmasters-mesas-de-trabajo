@@ -1,0 +1,142 @@
+import { ROLE_LABELS, SPEECH_START, type Participation } from "./core";
+
+const TZID = "America/Mexico_City";
+const PRODID = "-//Toastmasters Guadalajara//Calendario//ES";
+
+function escapeText(s: string): string {
+  return s
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r?\n/g, "\\n");
+}
+
+function octetLength(s: string): number {
+  return new TextEncoder().encode(s).length;
+}
+
+function foldLine(line: string): string {
+  const MAX = 75;
+  if (octetLength(line) <= MAX) return line;
+
+  const out: string[] = [];
+  let current = "";
+  let currentBytes = 0;
+
+  for (const ch of line) {
+    const chBytes = octetLength(ch);
+    if (currentBytes + chBytes > MAX - 1) {
+      out.push(current);
+      current = " " + ch;
+      currentBytes = 1 + chBytes;
+    } else {
+      current += ch;
+      currentBytes += chBytes;
+    }
+  }
+  if (current) out.push(current);
+
+  return out.join("\r\n");
+}
+
+interface GroupedEvent {
+  dateInt: number;
+  roleIds: number[];
+  hasSpeech: boolean;
+  hasRole: boolean;
+}
+
+function groupByDate(participations: Participation[]): GroupedEvent[] {
+  const map = new Map<number, GroupedEvent>();
+  for (const [dateInt, roleId] of participations) {
+    let entry = map.get(dateInt);
+    if (!entry) {
+      entry = { dateInt, roleIds: [], hasSpeech: false, hasRole: false };
+      map.set(dateInt, entry);
+    }
+    if (!entry.roleIds.includes(roleId)) entry.roleIds.push(roleId);
+    if (roleId >= SPEECH_START) entry.hasSpeech = true;
+    else entry.hasRole = true;
+  }
+  return Array.from(map.values()).sort((a, b) => a.dateInt - b.dateInt);
+}
+
+function uidFor(person: string, dateInt: number): string {
+  const slug = person
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  return `${dateInt}-${slug || "tm"}@toastmasters-guadalajara`;
+}
+
+function todayStampUtc(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`;
+}
+
+export function generateIcs(person: string, participations: Participation[]): string {
+  const events = groupByDate(participations);
+
+  const lines: string[] = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    `PRODID:${PRODID}`,
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VTIMEZONE",
+    `TZID:${TZID}`,
+    "BEGIN:STANDARD",
+    "DTSTART:19701101T020000",
+    "TZOFFSETFROM:-0500",
+    "TZOFFSETTO:-0600",
+    "TZNAME:CST",
+    "END:STANDARD",
+    "END:VTIMEZONE",
+  ];
+
+  const stamp = todayStampUtc();
+
+  for (const ev of events) {
+    const stampDate = String(ev.dateInt);
+    const rolesLabel = ev.roleIds
+      .map((id) => ROLE_LABELS[id] ?? `Rol ${id}`)
+      .join(", ");
+    const summary = `Mesa de Trabajo: ${rolesLabel}`;
+
+    lines.push(
+      "BEGIN:VEVENT",
+      `UID:${uidFor(person, ev.dateInt)}`,
+      `DTSTAMP:${stamp}`,
+      `DTSTART;TZID=${TZID}:${stampDate}T200000`,
+      `DTEND;TZID=${TZID}:${stampDate}T220000`,
+      `SUMMARY:${escapeText(summary)}`,
+      `DESCRIPTION:${escapeText(rolesLabel)}`,
+      "END:VEVENT",
+    );
+
+    const triggers: string[] = [];
+    if (ev.hasSpeech) triggers.push("-P14D");
+    if (ev.hasRole) triggers.push("-P7D");
+
+    // Un mismo evento puede necesitar ambos recordatorios.
+    const eventEnd = lines.length - 1;
+    lines.splice(
+      eventEnd,
+      1,
+      ...triggers.flatMap((trigger) => [
+        "BEGIN:VALARM",
+        "ACTION:DISPLAY",
+        `DESCRIPTION:${escapeText(summary)}`,
+        `TRIGGER:${trigger}`,
+        "END:VALARM",
+      ]),
+      "END:VEVENT",
+    );
+  }
+
+  lines.push("END:VCALENDAR");
+  return lines.map(foldLine).join("\r\n") + "\r\n";
+}
