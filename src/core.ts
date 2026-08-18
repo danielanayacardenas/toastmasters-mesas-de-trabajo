@@ -24,6 +24,7 @@ export const ROLE_LABELS = [
 ] as const;
 
 export const SPEECH_START = 12;
+export const PREPARED_SPEECH_LABEL = "Discurso Preparado";
 
 export function isSpeech(roleId: number): boolean {
   return roleId >= SPEECH_START;

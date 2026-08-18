@@ -1,4 +1,9 @@
-import { ROLE_LABELS, SPEECH_START, type Participation } from "./core";
+import {
+  PREPARED_SPEECH_LABEL,
+  ROLE_LABELS,
+  SPEECH_START,
+  type Participation,
+} from "./core";
 
 const TZID = "America/Mexico_City";
 const PRODID = "-//Toastmasters Guadalajara//Calendario//ES";
@@ -101,10 +106,16 @@ export function generateIcs(person: string, participations: Participation[]): st
 
   for (const ev of events) {
     const stampDate = String(ev.dateInt);
-    const rolesLabel = ev.roleIds
-      .map((id) => ROLE_LABELS[id] ?? `Rol ${id}`)
-      .join(", ");
-    const summary = `Mesa de Trabajo: ${rolesLabel}`;
+    const roleLabels = ev.roleIds
+      .filter((id) => id < SPEECH_START)
+      .map((id) => ROLE_LABELS[id] ?? `Rol ${id}`);
+    const labels = ev.hasSpeech
+      ? [PREPARED_SPEECH_LABEL, ...roleLabels]
+      : roleLabels;
+    const rolesLabel = labels.join(", ");
+    const summary = ev.hasSpeech
+      ? rolesLabel
+      : `Mesa de Trabajo: ${rolesLabel}`;
 
     lines.push(
       "BEGIN:VEVENT",

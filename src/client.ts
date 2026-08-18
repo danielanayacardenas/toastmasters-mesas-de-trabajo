@@ -1,5 +1,6 @@
 import {
   ROLE_LABELS,
+  PREPARED_SPEECH_LABEL,
   SPEECH_START,
   formatDateLabel,
   formatMonthLabel,
@@ -193,7 +194,11 @@ function groupForRender(parts: Participation[]) {
     const roles: string[] = [];
     for (const [, roleId] of list) {
       const label = ROLE_LABELS[roleId] ?? `Rol ${roleId}`;
-      if (roleId >= SPEECH_START) speeches.push(label);
+      if (roleId >= SPEECH_START) {
+        if (!speeches.includes(PREPARED_SPEECH_LABEL)) {
+          speeches.push(PREPARED_SPEECH_LABEL);
+        }
+      }
       else roles.push(label);
     }
     rows.push({ dateInt, speeches, roles });
