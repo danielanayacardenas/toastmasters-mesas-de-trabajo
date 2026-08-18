@@ -4,3 +4,9 @@ bun.lock
 bun.lockb
 *.log
 .DS_Store
+
+# Archivos locales no necesarios para el despliegue
+.agents/
+skills-lock.json
+Manual_de_Marca_Toastmasters_2025.pdf
+Mesas de Trabajo 2026 - Calendario.csv
