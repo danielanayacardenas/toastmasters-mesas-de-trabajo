@@ -2,6 +2,7 @@ import {
   ROLE_LABELS,
   SPEECH_START,
   formatDateLabel,
+  formatMonthLabel,
   intToDate,
   lowerBound,
   normalizeKey,
@@ -31,10 +32,7 @@ const els = {
   proxima: document.getElementById("proxima") as HTMLElement,
   proximaRol: document.getElementById("proxima-rol") as HTMLElement,
   proximaFecha: document.getElementById("proxima-fecha") as HTMLElement,
-  discursos: document.getElementById("discursos") as HTMLUListElement,
-  roles: document.getElementById("roles") as HTMLUListElement,
-  resumenDiscursos: document.getElementById("resumen-discursos") as HTMLElement,
-  resumenRoles: document.getElementById("resumen-roles") as HTMLElement,
+  meses: document.getElementById("meses") as HTMLElement,
   status: document.getElementById("status") as HTMLElement,
   lastUpdate: document.getElementById("last-update") as HTMLElement,
 };
@@ -204,10 +202,6 @@ function groupForRender(parts: Participation[]) {
   return rows;
 }
 
-function clear(ul: HTMLUListElement): void {
-  ul.replaceChildren();
-}
-
 function appendRow(
   ul: HTMLUListElement,
   dateLabel: string,
@@ -230,37 +224,79 @@ function eventDateLabel(dateInt: number): string {
   return `${formatDateLabel(intToDate(dateInt))} · ${SESSION_TIME} · hora de Guadalajara`;
 }
 
-function appendEmpty(ul: HTMLUListElement, message: string): void {
-  const li = document.createElement("li");
-  li.className = "empty";
-  li.textContent = message;
-  ul.append(li);
-}
-
 function render(rows: ReturnType<typeof groupForRender>): {
   discursos: number;
   roles: number;
 } {
-  clear(els.discursos);
-  clear(els.roles);
+  els.meses.replaceChildren();
 
   let d = 0;
   let r = 0;
+  const months = new Map<
+    string,
+    { label: string; rows: ReturnType<typeof groupForRender>; discursos: number; roles: number }
+  >();
 
   for (const row of rows) {
-    const label = eventDateLabel(row.dateInt);
-    if (row.speeches.length > 0) {
-      appendRow(els.discursos, label, row.speeches, "speech");
-      d += row.speeches.length;
-    }
-    if (row.roles.length > 0) {
-      appendRow(els.roles, label, row.roles, "role");
-      r += row.roles.length;
-    }
+    const date = intToDate(row.dateInt);
+    const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+    const month = months.get(monthKey) ?? {
+      label: formatMonthLabel(date),
+      rows: [],
+      discursos: 0,
+      roles: 0,
+    };
+    month.rows.push(row);
+    month.discursos += row.speeches.length;
+    month.roles += row.roles.length;
+    months.set(monthKey, month);
+    d += row.speeches.length;
+    r += row.roles.length;
   }
 
-  if (d === 0) appendEmpty(els.discursos, "Sin discursos próximos");
-  if (r === 0) appendEmpty(els.roles, "Sin roles próximos");
+  for (const month of months.values()) {
+    const section = document.createElement("section");
+    section.className = "month";
+
+    const heading = document.createElement("h3");
+    heading.className = "month-heading";
+    const title = document.createElement("span");
+    title.className = "month-title";
+    title.textContent = month.label;
+
+    const summary = document.createElement("span");
+    summary.className = "month-summary";
+    const speeches = document.createElement("span");
+    speeches.className = "badge badge--speech";
+    speeches.textContent = `${month.discursos} ${month.discursos === 1 ? "discurso" : "discursos"}`;
+    const roles = document.createElement("span");
+    roles.className = "badge badge--role";
+    roles.textContent = `${month.roles} ${month.roles === 1 ? "rol" : "roles"}`;
+    summary.append(speeches, roles);
+    heading.append(title, summary);
+
+    const list = document.createElement("ul");
+    list.className = "participaciones";
+    for (const row of month.rows) {
+      const items = [...row.speeches, ...row.roles];
+      appendRow(
+        list,
+        eventDateLabel(row.dateInt),
+        items,
+        row.speeches.length > 0 ? "speech" : "role",
+      );
+    }
+
+    section.append(heading, list);
+    els.meses.append(section);
+  }
+
+  if (months.size === 0) {
+    const empty = document.createElement("p");
+    empty.className = "no-results";
+    empty.textContent = "Sin participaciones próximas";
+    els.meses.append(empty);
+  }
 
   if (rows.length > 0) {
     const next = rows[0];
@@ -271,9 +307,6 @@ function render(rows: ReturnType<typeof groupForRender>): {
   } else {
     els.proxima.hidden = true;
   }
-
-  els.resumenDiscursos.textContent = `${d} ${d === 1 ? "discurso" : "discursos"}`;
-  els.resumenRoles.textContent = `${r} ${r === 1 ? "rol" : "roles"}`;
 
   return { discursos: d, roles: r };
 }

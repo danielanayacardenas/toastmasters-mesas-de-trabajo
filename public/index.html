@@ -190,8 +190,19 @@
       display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
       font-family: var(--font-heading); font-size: 1rem; margin: 1.5rem 0 0.3rem;
     }
-    .results h3.speech-heading { color: var(--maroon-deep); }
-    .results h3.role-heading { color: var(--loyal-blue-deep); }
+    .months { display: grid; gap: 1.5rem; }
+    .month-heading {
+      justify-content: space-between; padding-bottom: 0.55rem;
+      border-bottom: 2px solid var(--border); color: var(--loyal-blue-deep);
+      margin: 0;
+    }
+    .month-title { font-size: 1.1rem; }
+    .month-summary { display: inline-flex; gap: 0.45rem; flex-wrap: wrap; }
+    .month-summary .badge { font-size: 0.72rem; }
+    .no-results {
+      margin: 0; padding: 1rem; border: 1px dashed var(--border);
+      border-radius: 10px; color: var(--ink-soft); font-style: italic;
+    }
 
     ul.participaciones {
       list-style: none; padding: 0; margin: 1rem 0 0;
@@ -238,6 +249,7 @@
       .site-title { font-size: 1.3rem; }
       main { padding: 1.25rem 1rem 2rem; gap: 1rem; }
       section.card { padding: 1.1rem; }
+      .month-heading { align-items: flex-start; }
       ul.participaciones li.item { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
       ul.participaciones li .date { text-align: left; }
       .actions .btn { width: 100%; }
@@ -291,19 +303,7 @@
         <strong class="next-event__role" id="proxima-rol"></strong>
         <span class="next-event__date" id="proxima-fecha"></span>
       </div>
-      <h3 class="speech-heading">
-        Discursos
-        <span class="badge badge--speech badge--reminder" id="resumen-discursos">0 discursos</span>
-        <span class="badge badge--speech badge--reminder">ICS: 2 semanas antes</span>
-      </h3>
-      <ul class="participaciones" id="discursos"></ul>
-
-      <h3 class="role-heading">
-        Roles en mesa de trabajo
-        <span class="badge badge--role badge--reminder" id="resumen-roles">0 roles</span>
-        <span class="badge badge--role badge--reminder">ICS: 1 semana antes</span>
-      </h3>
-      <ul class="participaciones" id="roles"></ul>
+      <div class="months" id="meses"></div>
     </section>
   </main>
 

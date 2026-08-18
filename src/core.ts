@@ -66,6 +66,11 @@ export function formatDateLabel(d: Date): string {
   return `${d.getDate()} de ${MONTHS_ES[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
+export function formatMonthLabel(d: Date): string {
+  const month = MONTHS_ES[d.getMonth()];
+  return `${month.charAt(0).toUpperCase()}${month.slice(1)} ${d.getFullYear()}`;
+}
+
 export function todayInt(timeZone = "America/Mexico_City"): number {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone,
