@@ -33,12 +33,15 @@ sin backend y en la zona horaria `America/Mexico_City`.
 
 ```json
 {
-  "v": 1,
-  "roles": ["Toastmaster", "Topicsmaster", "..."],
-  "persons": ["Daniel Anaya"],
-  "index": {
-    "daniel anaya": [[20260818, 0], [20260915, 7]]
-  }
+    "v": 1,
+    "roles": ["Toastmaster", "Topicsmaster", "..."],
+    "persons": ["Daniel Anaya"],
+    "index": {
+        "daniel anaya": [
+            [20260818, 0],
+            [20260915, 7]
+        ]
+    }
 }
 ```
 
