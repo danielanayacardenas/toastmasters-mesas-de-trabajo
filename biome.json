@@ -34,6 +34,11 @@
             "enabled": true
         }
     },
+    "css": {
+        "parser": {
+            "tailwindDirectives": true
+        }
+    },
     "overrides": [
         {
             "includes": ["dist/**", "bun.lockb"],
@@ -41,6 +46,12 @@
                 "enabled": false
             },
             "linter": {
+                "enabled": false
+            }
+        },
+        {
+            "includes": ["src/styles/globals.css"],
+            "formatter": {
                 "enabled": false
             }
         }

@@ -8,6 +8,7 @@ const PUBLIC_DIR = `${ROOT}/public`;
 const DIST_DIR = `${ROOT}/dist`;
 const CLIENT_ENTRY = `${ROOT}/src/client.ts`;
 const HTML_ENTRY = `${PUBLIC_DIR}/index.html`;
+const CSS_ENTRY = `${ROOT}/src/styles/globals.css`;
 const JSON_OUT = `${DIST_DIR}/calendario.json`;
 const CONFIG_PATH = `${ROOT}/config/personas.json`;
 
@@ -114,6 +115,19 @@ async function main(): Promise<void> {
         }
     } else {
         console.log("• src/client.ts aún no existe, se omite el bundle del cliente");
+    }
+
+    // Tailwind v4: compilar globals.css -> dist/globals.css (híbrido @apply)
+    if (await exists(CSS_ENTRY)) {
+        console.log("• Compilando CSS con Tailwind…");
+        const proc = Bun.spawn(
+            ["bunx", "tailwindcss", "-i", CSS_ENTRY, "-o", `${DIST_DIR}/globals.css`, "--minify"],
+            { stdout: "inherit", stderr: "inherit" }
+        );
+        const exit = await proc.exited;
+        if (exit !== 0) throw new Error(`Tailwind build falló con código ${exit}`);
+    } else {
+        console.log("• src/styles/globals.css no existe, se omite CSS");
     }
 
     console.log("• Copiando index.html…");

@@ -483,6 +483,34 @@ function bind(): void {
     els.descargar.addEventListener("click", downloadIcs);
     els.actualizar.addEventListener("click", () => loadData("remote"));
 
+    // Dark/Light toggle con Lucide sun/moon (Tailwind global + a11y)
+    const toggle = document.getElementById("theme-toggle") as HTMLButtonElement | null;
+    const applyTheme = (dark: boolean) => {
+        document.documentElement.classList.toggle("dark", dark);
+        localStorage.setItem("theme", dark ? "dark" : "light");
+        if (toggle) {
+            toggle.setAttribute("aria-pressed", String(dark));
+            toggle.setAttribute(
+                "aria-label",
+                dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"
+            );
+            const sun = toggle.querySelector(".lucide-sun") as HTMLElement | null;
+            const moon = toggle.querySelector(".lucide-moon") as HTMLElement | null;
+            sun?.classList.toggle("hidden", dark);
+            moon?.classList.toggle("hidden", !dark);
+        }
+    };
+    const stored = localStorage.getItem("theme");
+    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    applyTheme(stored ? stored === "dark" : prefersDark);
+    toggle?.addEventListener("click", () => {
+        const isDark = document.documentElement.classList.contains("dark");
+        applyTheme(!isDark);
+    });
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+        if (!localStorage.getItem("theme")) applyTheme(e.matches);
+    });
+
     const year = new Date().getFullYear();
     const yearEl = document.getElementById("year");
     if (yearEl) yearEl.textContent = String(year);
