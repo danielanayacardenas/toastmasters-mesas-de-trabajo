@@ -353,6 +353,14 @@ function render(rows: ReturnType<typeof groupForRender>): {
                 row.speeches.length > 0 ? items.join(", ") : `Mesa de Trabajo: ${items.join(", ")}`;
             let description = items.join(", ");
             if (row.note) description += `\n\nNota: ${row.note.text}`;
+            // Google template usa default 30 min; aclarar recordatorio 14d/7d del ics
+            const reminder =
+                row.speeches.length > 0 && row.roles.length > 0
+                    ? "Recordatorio: 14 días discursos / 7 días roles (ajusta notificación en Google Calendar)"
+                    : row.speeches.length > 0
+                      ? "Recordatorio: 14 días antes (ajusta notificación en Google Calendar)"
+                      : "Recordatorio: 7 días antes (ajusta notificación en Google Calendar)";
+            description += `\n\n${reminder}`;
             const googleUrl = toGoogleCalendarUrl(row.dateInt, summary, description);
             appendRow(
                 list,

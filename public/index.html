@@ -600,6 +600,33 @@
                 background: var(--note-festividad-bg);
                 color: var(--note-festividad-text);
             }
+            /* Hover invertido para notas (efecto visible en atipica) */
+            li.note-atipica .icon-btn:hover,
+            li.note-atipica .icon-btn:focus-visible,
+            li.note-oficial .icon-btn:hover,
+            li.note-oficial .icon-btn:focus-visible {
+                background: #fff;
+                color: var(--note-atipica-bg);
+                border-color: var(--note-atipica-bg);
+            }
+            li.note-festividad .icon-btn:hover,
+            li.note-festividad .icon-btn:focus-visible {
+                background: #fff;
+                color: var(--note-festividad-text);
+                border-color: var(--note-festividad-text);
+            }
+            li.note-feriado .icon-btn:hover,
+            li.note-feriado .icon-btn:focus-visible {
+                background: #fff;
+                color: var(--note-feriado-text);
+                border-color: var(--note-feriado-text);
+            }
+            li.note-tematico .icon-btn:hover,
+            li.note-tematico .icon-btn:focus-visible {
+                background: #fff;
+                color: var(--note-tematico-text);
+                border-color: var(--note-tematico-text);
+            }
 
             /* Footer */
             .site-footer {
