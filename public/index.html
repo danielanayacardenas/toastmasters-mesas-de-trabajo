@@ -535,6 +535,72 @@
                 color: var(--note-atipica-text);
             }
 
+            /* Google Calendar icon button + tooltip (a11y) */
+            .icon-btn {
+                position: relative;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 44px;
+                min-height: 44px;
+                border-radius: 10px;
+                border: 1px solid var(--border);
+                background: #fff;
+                color: var(--loyal-blue);
+                text-decoration: none;
+                flex: 0 0 auto;
+                transition:
+                    background 0.15s,
+                    color 0.15s,
+                    border-color 0.15s;
+            }
+            .icon-btn:hover,
+            .icon-btn:focus-visible {
+                background: var(--loyal-blue);
+                color: #fff;
+                border-color: var(--loyal-blue);
+                outline: none;
+            }
+            .icon-btn:focus-visible {
+                outline: 3px solid var(--focus);
+                outline-offset: 2px;
+            }
+            .icon-btn::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: calc(100% + 8px);
+                left: 50%;
+                transform: translateX(-50%) translateY(4px);
+                opacity: 0;
+                pointer-events: none;
+                background: var(--ink);
+                color: #fff;
+                padding: 6px 8px;
+                border-radius: 8px;
+                font-size: 0.78rem;
+                font-family: var(--font-heading);
+                white-space: nowrap;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transition:
+                    opacity 0.15s,
+                    transform 0.15s;
+            }
+            .icon-btn:hover::after,
+            .icon-btn:focus-visible::after {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            li.note-atipica .icon-btn,
+            li.note-oficial .icon-btn {
+                background: var(--note-atipica-bg);
+                color: #fff;
+                border-color: var(--note-atipica-text);
+            }
+            li.note-festividad .icon-btn {
+                background: var(--note-festividad-bg);
+                color: var(--note-festividad-text);
+            }
+
             /* Footer */
             .site-footer {
                 background: var(--loyal-blue-deep);

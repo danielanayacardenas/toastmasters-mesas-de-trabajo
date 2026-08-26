@@ -93,6 +93,19 @@ function escapeParameter(s: string): string {
     return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
+export function toGoogleCalendarUrl(dateInt: number, summary: string, description: string): string {
+    const d = String(dateInt);
+    const dates = `${d}T200000/${d}T220000`;
+    const params = new URLSearchParams({
+        action: "TEMPLATE",
+        text: summary,
+        details: description,
+        dates,
+        ctz: TZID,
+    });
+    return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 export function generateIcs(
     person: string,
     participations: Participation[],

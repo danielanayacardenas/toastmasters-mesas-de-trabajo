@@ -21,7 +21,7 @@ import {
     SPEECH_START,
     todayInt,
 } from "./core";
-import { generateIcs } from "./ics";
+import { generateIcs, toGoogleCalendarUrl } from "./ics";
 import { parseCsvToData } from "./parser";
 
 let DATA: CalendarioData | null = null;
@@ -241,7 +241,8 @@ function appendRow(
     dateLabel: string,
     items: string[],
     variant: "speech" | "role",
-    noteCategory?: NoteCategory
+    noteCategory?: NoteCategory,
+    googleUrl?: string
 ): void {
     const li = document.createElement("li");
     li.className = variant === "speech" ? "item speech" : "item role";
@@ -255,6 +256,19 @@ function appendRow(
     date.className = "date";
     date.textContent = dateLabel;
     li.append(text, date);
+    if (googleUrl) {
+        const link = document.createElement("a");
+        link.className = "icon-btn";
+        link.href = googleUrl;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.setAttribute("data-tooltip", "Agregar al calendario");
+        link.setAttribute("aria-label", `Agregar al calendario - ${dateLabel}`);
+        // Lucide calendar-plus (currentColor = loyal-blue #004165)
+        link.innerHTML =
+            '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h8"/><path d="M12 18v-4"/><path d="M12 14h.01"/></svg>';
+        li.append(link);
+    }
     ul.append(li);
 }
 
@@ -335,12 +349,18 @@ function render(rows: ReturnType<typeof groupForRender>): {
         list.className = "participaciones";
         for (const row of month.rows) {
             const items = [...row.speeches, ...row.roles];
+            const summary =
+                row.speeches.length > 0 ? items.join(", ") : `Mesa de Trabajo: ${items.join(", ")}`;
+            let description = items.join(", ");
+            if (row.note) description += `\n\nNota: ${row.note.text}`;
+            const googleUrl = toGoogleCalendarUrl(row.dateInt, summary, description);
             appendRow(
                 list,
                 eventDateLabel(row.dateInt),
                 items,
                 row.speeches.length > 0 ? "speech" : "role",
-                row.note?.category
+                row.note?.category,
+                googleUrl
             );
         }
 
