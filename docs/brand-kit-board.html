@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Toastmasters Guadalajara — Brand Kit Board 3×3</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--loyal:#004165;--loyalD:#002F47;--maroon:#772432;--yellow:#F2DF74;--border:#EAEAEA;--bone:#F7F6F3}
+  *{box-sizing:border-box} body{margin:0;background:#121212;color:#111;font-family:"Source Sans 3",sans-serif;padding:24px}
+  h1{font-family:Montserrat,sans-serif;color:#fff;font-weight:700;letter-spacing:-.02em;margin:0 0 8px;font-size:22px}
+  .sub{color:#A9B2B1;margin:0 0 20px;font-size:13px}
+  .board{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1200px;margin:0 auto}
+  .panel{background:#fff;border-radius:12px;border:1px solid var(--border);padding:20px;min-height:220px;display:flex;flex-direction:column}
+  .panel--dark{background:linear-gradient(135deg,var(--loyal),var(--loyalD));color:#fff;border-color:var(--loyalD)}
+  .panel--maroon{background:var(--maroon);color:#fff}
+  .label{font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#787774;margin-bottom:12px}
+  .panel--dark .label,.panel--maroon .label{color:rgba(255,255,255,.7)}
+  .logo-cover{display:grid;place-items:center;text-align:center;gap:12px}
+  .seal{width:96px;height:96px;border-radius:16px;background:#fff;border:2px solid var(--yellow);display:grid;place-items:center;color:var(--loyal);font-family:Montserrat,sans-serif;font-weight:700;font-size:28px;letter-spacing:-.04em;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .seal small{display:block;font-size:9px;font-weight:600;letter-spacing:.12em;color:var(--loyal)}
+  .construction{font-family:monospace;font-size:11px;line-height:1.6;color:#3A4A54}
+  .mock{border:1px solid var(--border);border-radius:10px;padding:14px;background:var(--bone)}
+  .mock .select{height:36px;border:1px solid var(--border);border-radius:8px;background:#fff;display:flex;align-items:center;padding:0 10px;font-size:12px;color:#11202B}
+  .mock .btn{margin-top:10px;height:32px;background:var(--maroon);color:#fff;border-radius:8px;display:grid;place-items:center;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em}
+  .swatches{display:flex;gap:8px;flex-wrap:wrap}
+  .sw{width:64px;height:64px;border-radius:8px;border:1px solid var(--border);display:grid;place-items:end start;padding:6px;font-size:9px;font-weight:600;color:#fff}
+  .type-spec{font-family:Montserrat,sans-serif;font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+  .type-body{margin-top:8px;font-size:13px;line-height:1.5;color:#3A4A54}
+  .image-ph{height:120px;border-radius:8px;background:linear-gradient(135deg,#002F47 0%,#004165 55%,#F2DF7415 100%);display:grid;place-items:center;color:#fff;font-size:11px;letter-spacing:.08em}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{padding:4px 10px;border-radius:999px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;letter-spacing:.04em}
+  .chip--speech{background:rgba(119,36,50,.12);color:#5A1C26}
+  .chip--role{background:rgba(0,65,101,.12);color:#002F47}
+  @media(max-width:900px){.board{grid-template-columns:1fr 1fr} .panel:nth-child(9){grid-column:span 2}}
+  @media(max-width:600px){.board{grid-template-columns:1fr} .panel:nth-child(9){grid-column:auto}}
+</style>
+</head>
+<body>
+<h1>Toastmasters Guadalajara — Brand Kit Board</h1>
+<p class="sub">3×3 · Quiet Premium Neutral · Loyal Blue #004165 · Maroon #772432 · Bone subtle #F7F6F3 · Montserrat + Source Sans 3</p>
+<div class="board">
+  <!-- 1 Logo Cover -->
+  <div class="panel panel--dark logo-cover">
+    <span class="label">01 — Logo Cover</span>
+    <div class="seal">TM<small>GUADALAJARA</small></div>
+    <div style="font-family:Montserrat,sans-serif;font-weight:600;letter-spacing:.06em;font-size:12px">TOASTMASTERS<br>GUADALAJARA</div>
+  </div>
+  <!-- 2 Construction -->
+  <div class="panel">
+    <span class="label">02 — Construction</span>
+    <div class="construction">
+      ○ seal 96×96, border 2px #F2DF74<br>
+      — TM ligature, geometric, -0.04em tracking<br>
+      — SE notch = path arrow (growth)<br>
+      — x-height 0.52, crosshair grid<br>
+      — min 72px web, clear-space 1×
+    </div>
+    <div style="margin-top:12px;height:80px;border:1px dashed var(--border);border-radius:8px;display:grid;place-items:center;color:#787774;font-size:11px">◯ + TM + ◸ notch → seal</div>
+  </div>
+  <!-- 3 Digital Application -->
+  <div class="panel">
+    <span class="label">03 — Digital Application</span>
+    <div class="mock">
+      <div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:600;color:var(--loyal);margin-bottom:8px">Selecciona tu nombre</div>
+      <div class="select">Selecciona tu nombre… ▾</div>
+      <div class="select" style="margin-top:8px;color:#787774">socio@ejemplo.com</div>
+      <div class="btn">DESCARGAR INVITACIÓN (.ICS)</div>
+    </div>
+  </div>
+  <!-- 4 Essence -->
+  <div class="panel" style="justify-content:center">
+    <span class="label">04 — Brand Essence</span>
+    <div style="font-family:Montserrat,sans-serif;font-weight:700;font-size:24px;letter-spacing:-.02em;line-height:1.1">Tu próxima<br>palabra,<br><span style="color:var(--maroon)">a tiempo.</span></div>
+    <div style="margin-top:10px;font-size:12px;color:#3A4A54">Claridad · Puntualidad · Pertenencia</div>
+  </div>
+  <!-- 5 Color -->
+  <div class="panel">
+    <span class="label">05 — Color System</span>
+    <div class="swatches">
+      <div class="sw" style="background:#004165">#004165 loyal</div>
+      <div class="sw" style="background:#772432">#772432 maroon</div>
+      <div class="sw" style="background:#F2DF74;color:#11202B">#F2DF74 yellow</div>
+      <div class="sw" style="background:#F5F5F5;color:#11202B;border:1px solid #EAEAEA">#F5F5F5 fair</div>
+      <div class="sw" style="background:#3D4F5A">#3D4F5A cool-gray</div>
+      <div class="sw" style="background:#EAEAEA;color:#11202B">#EAEAEA border</div>
+    </div>
+  </div>
+  <!-- 6 Typography -->
+  <div class="panel">
+    <span class="label">06 — Typography</span>
+    <div class="type-spec">Montserrat<br><span style="font-weight:600;font-size:18px">Aa 700 · 600 · 500</span></div>
+    <div class="type-body" style="font-family:'Source Sans 3',sans-serif">Source Sans 3 — 17px / 1.55<br>tabular-nums on dates · pretty on lede</div>
+  </div>
+  <!-- 7 Physical -->
+  <div class="panel">
+    <span class="label">07 — Physical</span>
+    <div style="border:1px solid var(--border);border-radius:10px;padding:16px;background:#fff;display:flex;gap:12px;align-items:center">
+      <div style="width:44px;height:44px;border-radius:8px;background:var(--loyal);display:grid;place-items:center;color:var(--yellow);font-family:Montserrat,sans-serif;font-weight:700;font-size:14px">TM</div>
+      <div><div style="font-family:Montserrat,sans-serif;font-weight:600;font-size:12px">Socio · Credencial</div><div style="font-size:11px;color:#787774">Sello en relieve · borde amarillo</div></div>
+    </div>
+  </div>
+  <!-- 8 Image Direction -->
+  <div class="panel">
+    <span class="label">08 — Image Direction</span>
+    <div class="image-ph">Guadalajara · tarde desaturada · grain 0.02</div>
+    <div style="margin-top:8px;font-size:11px;color:#787774">No stock office · No neon · Warm desaturated, 1200x800, overlay loyal 0.08</div>
+  </div>
+  <!-- 9 System Detail -->
+  <div class="panel">
+    <span class="label">09 — System Detail</span>
+    <div class="chips"><span class="chip chip--speech">Discurso Preparado</span><span class="chip chip--role">Toastmaster</span></div>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+      <div style="width:44px;height:44px;border-radius:10px;border:1px solid var(--border);display:grid;place-items:center;color:var(--loyal)">◯+</div>
+      <div style="font-size:11px;color:#3A4A54">44px icon-btn · focus #765F00 · tooltip top</div>
+    </div>
+    <div style="margin-top:12px;height:10px;border-radius:999px;background:linear-gradient(90deg,#EEF1F3 25%,#F7F6F3 50%,#EEF1F3 75%);border:1px solid var(--border)"></div>
+    <div style="font-size:10px;color:#787774;margin-top:4px">skeleton shimmer 1.2s</div>
+  </div>
+</div>
+<p style="color:#787774;font-size:11px;margin-top:16px;text-align:center">Board spec per brandkit/SKILL.md 3×3 · Generate image via prompt in BRANDKIT.md or use this HTML as reference · Keep outer dark charcoal, strong gutters</p>
+</body>
+</html>
