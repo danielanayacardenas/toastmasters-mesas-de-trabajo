@@ -1,6 +1,6 @@
 node_modules
-dist
-bun.lock
+dist/*
+!dist/calendario.json
 bun.lockb
 *.log
 .DS_Store

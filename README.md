@@ -1,40 +1,45 @@
 # Toastmasters Guadalajara — Calendario de Participaciones
 
 Aplicación estática que convierte el calendario publicado en Google Sheets en
-un archivo `.ics` descargable, respetando la
-identidad de marca de Toastmasters International (Manual 2025).
+participaciones filtrables, con **agregado 1-click a Google Calendar** y **PDF por bloques sin cortes**, respetando la identidad de marca de Toastmasters International (Manual 2025). 100 % cliente, sin backend. `.ics` queda oculto como fallback (`src/ics.ts`).
 
 ## Características
 
-- 100 % cliente: sin backend, sin base de datos.
+- 100 % cliente: sin backend, sin base de datos. `dist/calendario.json` con fallback si Sheets no responde (útil en CI).
 - Pre-construye un índice por persona para consultas O(1).
-- Filtro de participaciones futuras (zona horaria
-  `America/Mexico_City`).
-- Eventos 20:00–22:00 con VALARM `-P14D` para discursos y `-P7D` para
-  los demás roles.
-- Diseño responsive con la paleta del manual:
-  Azul Leal `#004165`, Granate Verdadero `#772432`, Gris Fresco
-  `#A9B2B1`, Amarillo Alegre `#F2DF74`.
-- Tipografías: Montserrat (encabezados) y Source Sans 3 (texto).
+- Filtro de participaciones futuras (zona horaria `America/Mexico_City`) con reactivación automática de `config/personas.json`.
+- Eventos 20:00–22:00. Agregado por fecha a **Google Calendar 1-click** (`20:00–22:00 America/Mexico_City`) con recordatorio 14d discursos / 7d roles (ajustable en Google Calendar). `.ics` oculto disponible vía `window._hiddenDownloadIcs`.
+- **PDF por bloques** (`html2canvas + jspdf`) sin cortes mid-card, paginado por `section.month`/`li.item`, header compacto, fondo blanco opaco anti-transparencia (funciona en light y dark).
+- **Bento sticky 880px** (`380px filtro` + `1fr resultados`), más aire editorial, `header` con sombra tintada y grain `0.02`, `Phosphor` icons, `Actualizar` primario granate + `Descargar PDF` secundario igual tamaño (44px tappable).
+- **Dark mode AA** (`html.dark` toggle sol/luna, `focus #F2DF74`, `card #1E2F3D`, badges/notas con 4.5:1).
+- Diseño responsive con paleta Manual 2025: Azul Leal `#004165`, Granate `#772432`, Gris `#3D4F5A` (4.5:1), Amarillo `#F2DF74`, bone `#F7F6F3` sutil.
+- Tipografías: Montserrat (encabezados, `text-wrap:balance`) y Source Sans 3 (texto, `tabular-nums`).
+- `noindex,nofollow` + `robots.txt Disallow` (herramienta privada), `canonical` self-referencing.
 
 ## Estructura
 
 ```
 src/
-  build.ts    # orquesta CSV → JSON → bundle → HTML
-  client.ts   # entrypoint del navegador
+  build.ts    # CSV → JSON → bundle (Bun.build + tailwindcss) con fallback dist/calendario.json
+  client.ts   # filtros, bento, PDF bloques (html2canvas+jspdf), google links, dark toggle
   core.ts     # tipos, roles, fechas, búsqueda binaria
   csv.ts      # parser CSV RFC4180
   dates.ts    # parser de fechas en español
   filter.ts   # exclusión y reactivación de personas
-  ics.ts      # generador ICS
+  ics.ts      # generador ICS (oculto, fallback)
   parser.ts   # CSV → CalendarioData compacto
   serve.ts    # preview estático local con Bun
+  styles/globals.css # Tailwind v4 + tokens + editorial pulido + dark AA
 config/
   personas.json # exclusiones e inclusiones manuales
 public/
-  index.html  # UI de marca
-vercel.json   # config de despliegue
+  index.html  # bento, copy Propuesta A, Phosphor, a11y
+  robots.txt  # Disallow (privado)
+docs/
+  BRANDKIT.md # board 3×3 premium
+  brand-kit-board.html # preview visual
+vercel.json   # headers s-maxage 300 calendario.json, immutable app.js/css
+.github/workflows/ci.yml # Biome + build (bun 1.3.4)
 ```
 
 ## Build local

@@ -1,4 +1,13 @@
-import { CLUB, EXCLUDED, GOOGLE_SHEETS_CSV_URL, INCLUDED, ORGANIZER_EMAIL, TIMEZONE } from "./config";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+import {
+    CLUB,
+    EXCLUDED,
+    GOOGLE_SHEETS_CSV_URL,
+    INCLUDED,
+    ORGANIZER_EMAIL,
+    TIMEZONE,
+} from "./config";
 import {
     type CalendarioData,
     formatDateLabel,
@@ -16,8 +25,6 @@ import {
 } from "./core";
 import { generateIcs, toGoogleCalendarUrl } from "./ics";
 import { parseCsvToData } from "./parser";
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
 
 let DATA: CalendarioData | null = null;
 let lastRendered: { person: string; parts: Participation[] } | null = null;
@@ -61,7 +68,9 @@ function applyFilters(raw: CalendarioData): CalendarioData {
         keep.set(person, future);
     }
 
-    const persons = Array.from(keep.keys()).sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+    const persons = Array.from(keep.keys()).sort((a, b) =>
+        a.localeCompare(b, "es", { sensitivity: "base" })
+    );
 
     const index: Record<string, Participation[]> = {};
     for (const p of persons) index[normalizeKey(p)] = keep.get(p)!;
@@ -102,7 +111,9 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
 
         status("Procesando participaciones…");
         const raw =
-            source === "remote" ? parseCsvToData(await res.text()) : ((await res.json()) as CalendarioData);
+            source === "remote"
+                ? parseCsvToData(await res.text())
+                : ((await res.json()) as CalendarioData);
         DATA = applyFilters(raw);
 
         populatePersonas();
@@ -117,7 +128,7 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
                 source === "remote"
                     ? "Calendario actualizado desde Google Sheets. Elige tu nombre para ver tus participaciones."
                     : "Calendario listo. Elige tu nombre para ver tus participaciones.",
-                "ok",
+                "ok"
             );
         }
     } catch (err) {
@@ -129,7 +140,10 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
                 els.persona.value = previous;
                 show(false);
             }
-            status("No se pudo actualizar. Se conservan los datos anteriores; inténtalo de nuevo.", "error");
+            status(
+                "No se pudo actualizar. Se conservan los datos anteriores; inténtalo de nuevo.",
+                "error"
+            );
         } else {
             DATA = null;
             lastRendered = null;
@@ -143,7 +157,10 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
             option.value = "";
             option.textContent = "No se pudo cargar el calendario";
             els.persona.append(option);
-            status("No se pudo cargar el calendario. Revisa tu conexión e inténtalo de nuevo.", "error");
+            status(
+                "No se pudo cargar el calendario. Revisa tu conexión e inténtalo de nuevo.",
+                "error"
+            );
         }
     } finally {
         els.meses.removeAttribute("aria-busy");
@@ -176,7 +193,9 @@ function populatePersonas(): void {
     els.persona.replaceChildren();
     const placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.textContent = DATA.persons.length ? "Selecciona tu nombre…" : "No hay próximas participaciones";
+    placeholder.textContent = DATA.persons.length
+        ? "Selecciona tu nombre…"
+        : "No hay próximas participaciones";
     els.persona.append(placeholder);
     for (const p of DATA.persons) {
         const opt = document.createElement("option");
@@ -197,7 +216,8 @@ function groupForRender(parts: Participation[], notes: Record<number, NoteInfo>)
         byDate.set(p[0], list);
     }
 
-    const rows: Array<{ dateInt: number; speeches: string[]; roles: string[]; note?: NoteInfo }> = [];
+    const rows: Array<{ dateInt: number; speeches: string[]; roles: string[]; note?: NoteInfo }> =
+        [];
     for (const [dateInt, list] of byDate) {
         const speeches: string[] = [];
         const roles: string[] = [];
@@ -221,7 +241,7 @@ function appendRow(
     items: string[],
     variant: "speech" | "role",
     noteCategory?: NoteCategory,
-    googleUrl?: string,
+    googleUrl?: string
 ): void {
     const li = document.createElement("li");
     li.className = variant === "speech" ? "item speech" : "item role";
@@ -244,7 +264,8 @@ function appendRow(
         link.setAttribute("data-tooltip", "Agregar al calendario");
         link.setAttribute("aria-label", `Agregar al calendario - ${dateLabel}`);
         // Phosphor calendar-plus (v2: replaces Lucide, single family)
-        link.innerHTML = '<i class="ph ph-calendar-plus" aria-hidden="true" style="font-size:18px"></i>';
+        link.innerHTML =
+            '<i class="ph ph-calendar-plus" aria-hidden="true" style="font-size:18px"></i>';
         li.append(link);
     }
     ul.append(li);
@@ -286,7 +307,7 @@ function render(rows: ReturnType<typeof groupForRender>): {
         month.rows.push(row);
         month.discursos += row.speeches.length;
         month.roles += row.roles.length;
-        if (row.note && !month.notes.some((n) => n.text === row.note!.text)) {
+        if (row.note && !month.notes.some((n) => n.text === row.note?.text)) {
             month.notes.push(row.note);
         }
         months.set(monthKey, month);
@@ -327,7 +348,8 @@ function render(rows: ReturnType<typeof groupForRender>): {
         list.className = "participaciones";
         for (const row of month.rows) {
             const items = [...row.speeches, ...row.roles];
-            const summary = row.speeches.length > 0 ? items.join(", ") : `Mesa de Trabajo: ${items.join(", ")}`;
+            const summary =
+                row.speeches.length > 0 ? items.join(", ") : `Mesa de Trabajo: ${items.join(", ")}`;
             let description = items.join(", ");
             if (row.note) description += `\n\nNota: ${row.note.text}`;
             // Google template usa default 30 min; aclarar recordatorio 14d/7d del ics
@@ -339,7 +361,14 @@ function render(rows: ReturnType<typeof groupForRender>): {
                       : "Recordatorio: 7 días antes (ajusta notificación en Google Calendar)";
             description += `\n\n${reminder}`;
             const googleUrl = toGoogleCalendarUrl(row.dateInt, summary, description);
-            appendRow(list, eventDateLabel(row.dateInt), items, row.speeches.length > 0 ? "speech" : "role", row.note?.category, googleUrl);
+            appendRow(
+                list,
+                eventDateLabel(row.dateInt),
+                items,
+                row.speeches.length > 0 ? "speech" : "role",
+                row.note?.category,
+                googleUrl
+            );
         }
 
         section.append(heading, list);
@@ -408,7 +437,12 @@ function show(shouldFocus = true): void {
 }
 
 // ICS oculto: se mantiene por compatibilidad pero sin UI (pedido: deja oculto el ICS)
-function _hiddenDownloadIcs(person: string, parts: Participation[], attendeeEmail: string, attendeeName: string): void {
+function _hiddenDownloadIcs(
+    person: string,
+    parts: Participation[],
+    attendeeEmail: string,
+    attendeeName: string
+): void {
     if (!DATA) return;
     const ics = generateIcs(
         person,
@@ -418,7 +452,7 @@ function _hiddenDownloadIcs(person: string, parts: Participation[], attendeeEmai
             attendeeEmail,
             attendeeName,
         },
-        DATA.notes,
+        DATA.notes
     );
     const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -431,7 +465,7 @@ function _hiddenDownloadIcs(person: string, parts: Participation[], attendeeEmai
     setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 // Exponer para uso manual desde consola si se necesita
-// @ts-ignore
+// @ts-expect-error
 (window as unknown as Record<string, unknown>)._hiddenDownloadIcs = _hiddenDownloadIcs;
 
 async function downloadPdf(): Promise<void> {
@@ -470,7 +504,9 @@ async function downloadPdf(): Promise<void> {
         if (proximaEl) proximaEl.style.marginTop = "0.75rem";
         document.body.appendChild(clone);
         // Doble rAF para asegurar frame pintado sin opacity 0 (H2)
-        await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+        await new Promise<void>((r) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => r()))
+        );
 
         const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
         const pageWidth = pdf.internal.pageSize.getWidth();
@@ -508,11 +544,17 @@ async function downloadPdf(): Promise<void> {
             const hMm = toMm(b.offsetHeight + 8);
             const avail = isFirst ? availFirst : availOther;
             // Si es month y no cabe entero, expandir a sus li (mantiene espacio normal 0.5rem)
-            if (b.tagName.toLowerCase() === "section" && hMm > avail && b.querySelectorAll("li.item").length > 0) {
+            if (
+                b.tagName.toLowerCase() === "section" &&
+                hMm > avail &&
+                b.querySelectorAll("li.item").length > 0
+            ) {
                 // medir heading aparte
                 const heading = b.querySelector(".month-heading") as HTMLElement | null;
                 if (heading) expandedBlocks.push(heading);
-                b.querySelectorAll("li.item").forEach((li) => expandedBlocks.push(li as HTMLElement));
+                for (const li of b.querySelectorAll("li.item")) {
+                    expandedBlocks.push(li as HTMLElement);
+                }
             } else {
                 expandedBlocks.push(b);
             }
@@ -583,7 +625,10 @@ function bind(): void {
         localStorage.setItem("theme", dark ? "dark" : "light");
         if (toggle) {
             toggle.setAttribute("aria-pressed", String(dark));
-            toggle.setAttribute("aria-label", dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+            toggle.setAttribute(
+                "aria-label",
+                dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"
+            );
             const sun = toggle.querySelector(".ph-sun-icon") as HTMLElement | null;
             const moon = toggle.querySelector(".ph-moon-icon") as HTMLElement | null;
             sun?.classList.toggle("hidden", dark);

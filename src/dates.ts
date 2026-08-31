@@ -14,7 +14,7 @@ const MONTHS: Record<string, number> = {
     diciembre: 11,
 };
 
-const MONTH_RE = new RegExp("(" + Object.keys(MONTHS).join("|") + ")\\w*", "i");
+const _MONTH_RE = new RegExp(`(${Object.keys(MONTHS).join("|")})\\w*`, "i");
 
 function stripAccents(s: string): string {
     return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");

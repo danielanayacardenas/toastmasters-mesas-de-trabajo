@@ -33,7 +33,7 @@ function foldLine(line: string): string {
         const chBytes = octetLength(ch);
         if (currentBytes + chBytes > MAX - 1) {
             out.push(current);
-            current = " " + ch;
+            current = ` ${ch}`;
             currentBytes = 1 + chBytes;
         } else {
             current += ch;
@@ -196,5 +196,5 @@ export function generateIcs(
     }
 
     lines.push("END:VCALENDAR");
-    return lines.map(foldLine).join("\r\n") + "\r\n";
+    return `${lines.map(foldLine).join("\r\n")}\r\n`;
 }

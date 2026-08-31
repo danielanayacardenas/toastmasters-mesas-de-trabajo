@@ -92,9 +92,9 @@ export function todayInt(timeZone = "America/Mexico_City"): number {
         month: "2-digit",
         day: "2-digit",
     }).formatToParts(new Date());
-    const y = Number(parts.find((p) => p.type === "year")!.value);
-    const m = Number(parts.find((p) => p.type === "month")!.value);
-    const d = Number(parts.find((p) => p.type === "day")!.value);
+    const y = Number(parts.find((p) => p.type === "year")?.value);
+    const m = Number(parts.find((p) => p.type === "month")?.value);
+    const d = Number(parts.find((p) => p.type === "day")?.value);
     return y * 10000 + m * 100 + d;
 }
 
