@@ -1,0 +1,5 @@
+# Private member tool — do not crawl (SEO skill: noindex + no sitemap)
+User-agent: *
+Disallow: /
+# Allow assets needed for rendering if indexed page added later, keep locked for now
+# Sitemap intentionally omitted while noindex is active

@@ -1,19 +1,19 @@
-import { lowerBound, normalizeKey, todayInt, type CalendarioData } from "./core";
+import { type CalendarioData, lowerBound, normalizeKey, todayInt } from "./core";
 
 export interface PersonasConfig {
-  excluded: string[];
-  included: string[];
+    excluded: string[];
+    included: string[];
 }
 
 export interface FilterStats {
-  removed: number;
-  reactivated: string[];
-  active: number;
+    removed: number;
+    reactivated: string[];
+    active: number;
 }
 
 export const DEFAULT_PERSONAS_CONFIG: PersonasConfig = {
-  excluded: [],
-  included: [],
+    excluded: [],
+    included: [],
 };
 
 /**
@@ -27,58 +27,58 @@ export const DEFAULT_PERSONAS_CONFIG: PersonasConfig = {
  * quedar excluida. Para incluirla permanentemente se usa `included`.
  */
 export function filterPersons(
-  data: CalendarioData,
-  cfg: PersonasConfig,
-  timeZone = "America/Mexico_City",
+    data: CalendarioData,
+    cfg: PersonasConfig,
+    timeZone = "America/Mexico_City"
 ): { data: CalendarioData; stats: FilterStats } {
-  const today = todayInt(timeZone);
-  const excludedKeys = new Set(cfg.excluded.map(normalizeKey));
-  const includedKeys = new Set(cfg.included.map(normalizeKey));
+    const today = todayInt(timeZone);
+    const excludedKeys = new Set(cfg.excluded.map(normalizeKey));
+    const includedKeys = new Set(cfg.included.map(normalizeKey));
 
-  const keep = new Map<string, [number, number][]>();
-  const reactivated: string[] = [];
-  let removed = 0;
+    const keep = new Map<string, [number, number][]>();
+    const reactivated: string[] = [];
+    let removed = 0;
 
-  for (const person of data.persons) {
-    const key = normalizeKey(person);
-    const list = data.index[key] ?? [];
-    const isIncluded = includedKeys.has(key);
-    const isExcluded = excludedKeys.has(key) && !isIncluded;
+    for (const person of data.persons) {
+        const key = normalizeKey(person);
+        const list = data.index[key] ?? [];
+        const isIncluded = includedKeys.has(key);
+        const isExcluded = excludedKeys.has(key) && !isIncluded;
 
-    if (isExcluded) removed++;
+        if (isExcluded) removed++;
 
-    const future = list.slice(lowerBound(list, today));
+        const future = list.slice(lowerBound(list, today));
 
-    // El artefacto publicado no necesita conservar el historial.
-    if (future.length === 0) continue;
+        // El artefacto publicado no necesita conservar el historial.
+        if (future.length === 0) continue;
 
-    if (isIncluded) {
-      keep.set(person, future);
-      continue;
+        if (isIncluded) {
+            keep.set(person, future);
+            continue;
+        }
+
+        if (!isExcluded) {
+            keep.set(person, future);
+            continue;
+        }
+
+        keep.set(person, future);
+        reactivated.push(person);
     }
 
-    if (!isExcluded) {
-      keep.set(person, future);
-      continue;
-    }
+    const persons = Array.from(keep.keys()).sort((a, b) =>
+        a.localeCompare(b, "es", { sensitivity: "base" })
+    );
 
-    keep.set(person, future);
-    reactivated.push(person);
-  }
+    const index: Record<string, [number, number][]> = {};
+    for (const p of persons) index[normalizeKey(p)] = keep.get(p)!;
 
-  const persons = Array.from(keep.keys()).sort((a, b) =>
-    a.localeCompare(b, "es", { sensitivity: "base" }),
-  );
-
-  const index: Record<string, [number, number][]> = {};
-  for (const p of persons) index[normalizeKey(p)] = keep.get(p)!;
-
-  return {
-    data: { ...data, persons, index },
-    stats: {
-      removed,
-      reactivated,
-      active: persons.length,
-    },
-  };
+    return {
+        data: { ...data, persons, index },
+        stats: {
+            removed,
+            reactivated,
+            active: persons.length,
+        },
+    };
 }

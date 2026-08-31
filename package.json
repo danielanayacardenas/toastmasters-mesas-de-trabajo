@@ -1,10 +1,25 @@
 {
-  "name": "toastmasters-guadalajara-calendario",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "bun run src/build.ts",
-    "dev": "bun run build && bun run src/serve.ts"
-  }
+    "name": "toastmasters-guadalajara-calendario",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "bun run src/build.ts",
+        "dev": "bun run build && bun run src/serve.ts",
+        "format": "biome check --write .",
+        "format:check": "biome check .",
+        "lint": "biome lint .",
+        "lint:fix": "biome lint --write .",
+        "check": "biome check .",
+        "check:fix": "biome check --write ."
+    },
+    "devDependencies": {
+        "@biomejs/biome": "^2.5.10",
+        "@tailwindcss/cli": "^4.3.3",
+        "tailwindcss": "4"
+    },
+    "dependencies": {
+        "html2canvas": "^1.4.1",
+        "jspdf": "^4.2.1"
+    }
 }
