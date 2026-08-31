@@ -41,7 +41,7 @@
     },
     "overrides": [
         {
-            "includes": ["dist/**", "bun.lockb"],
+            "includes": ["dist/**", "bun.lockb", "bun.lock"],
             "formatter": {
                 "enabled": false
             },
