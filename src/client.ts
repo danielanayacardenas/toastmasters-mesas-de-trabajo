@@ -1,11 +1,4 @@
-import {
-    CLUB,
-    EXCLUDED,
-    GOOGLE_SHEETS_CSV_URL,
-    INCLUDED,
-    ORGANIZER_EMAIL,
-    TIMEZONE,
-} from "./config";
+import { CLUB, EXCLUDED, GOOGLE_SHEETS_CSV_URL, INCLUDED, ORGANIZER_EMAIL, TIMEZONE } from "./config";
 import {
     type CalendarioData,
     formatDateLabel,
@@ -23,6 +16,8 @@ import {
 } from "./core";
 import { generateIcs, toGoogleCalendarUrl } from "./ics";
 import { parseCsvToData } from "./parser";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 let DATA: CalendarioData | null = null;
 let lastRendered: { person: string; parts: Participation[] } | null = null;
@@ -30,12 +25,9 @@ const SESSION_TIME = "20:00–22:00";
 
 const els = {
     persona: document.getElementById("persona") as HTMLSelectElement,
-    descargar: document.getElementById("descargar") as HTMLButtonElement,
     actualizar: document.getElementById("actualizar") as HTMLButtonElement,
+    descargarPdf: document.getElementById("descargar-pdf") as HTMLButtonElement,
     resultados: document.getElementById("resultados") as HTMLElement,
-    destinatarioField: document.getElementById("destinatario-field") as HTMLElement,
-    destinatario: document.getElementById("destinatario") as HTMLInputElement,
-    destinatarioError: document.getElementById("destinatario-error") as HTMLElement,
     proxima: document.getElementById("proxima") as HTMLElement,
     proximaRol: document.getElementById("proxima-rol") as HTMLElement,
     proximaFecha: document.getElementById("proxima-fecha") as HTMLElement,
@@ -49,25 +41,6 @@ function status(message: string, kind: "info" | "error" | "ok" = "info"): void {
     els.status.textContent = message;
     els.status.dataset.kind = kind;
     els.status.setAttribute("role", kind === "error" ? "alert" : "status");
-}
-
-function isValidEmail(value: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-}
-
-function updateRecipientState(showError = false): void {
-    const value = els.destinatario.value.trim();
-    const valid = isValidEmail(value);
-    const hasPerson = Boolean(DATA && els.persona.value);
-    const invalid = showError && value.length > 0 && !valid;
-
-    els.destinatario.disabled = !DATA || !hasPerson;
-    els.destinatario.setAttribute("aria-invalid", String(invalid));
-    els.destinatarioError.hidden = !invalid;
-    els.destinatarioError.textContent = invalid
-        ? "Escribe un correo válido para generar la invitación."
-        : "";
-    els.descargar.disabled = !hasPerson || !valid;
 }
 
 function applyFilters(raw: CalendarioData): CalendarioData {
@@ -88,9 +61,7 @@ function applyFilters(raw: CalendarioData): CalendarioData {
         keep.set(person, future);
     }
 
-    const persons = Array.from(keep.keys()).sort((a, b) =>
-        a.localeCompare(b, "es", { sensitivity: "base" })
-    );
+    const persons = Array.from(keep.keys()).sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
 
     const index: Record<string, Participation[]> = {};
     for (const p of persons) index[normalizeKey(p)] = keep.get(p)!;
@@ -103,11 +74,25 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
     const previousData = DATA;
     lastRendered = null;
     els.resultados.hidden = true;
-    els.descargar.disabled = true;
-    els.destinatario.disabled = true;
+    if (els.descargarPdf) {
+        els.descargarPdf.hidden = true;
+        els.descargarPdf.disabled = true;
+    }
     status(source === "remote" ? "Actualizando desde Google Sheets…" : "Cargando calendario…");
     els.actualizar.disabled = true;
     els.persona.disabled = true;
+    // v2 skeleton (redesign: avoid generic spinner, match card shape)
+    if (source === "remote") {
+        els.meses.replaceChildren();
+        for (let i = 0; i < 2; i++) {
+            const sk = document.createElement("div");
+            sk.className = "skeleton";
+            sk.setAttribute("aria-hidden", "true");
+            els.meses.append(sk);
+        }
+        els.resultados.hidden = false;
+        els.meses.setAttribute("aria-busy", "true");
+    }
 
     try {
         const res = await fetch(source === "remote" ? GOOGLE_SHEETS_CSV_URL : "./calendario.json", {
@@ -117,9 +102,7 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
 
         status("Procesando participaciones…");
         const raw =
-            source === "remote"
-                ? parseCsvToData(await res.text())
-                : ((await res.json()) as CalendarioData);
+            source === "remote" ? parseCsvToData(await res.text()) : ((await res.json()) as CalendarioData);
         DATA = applyFilters(raw);
 
         populatePersonas();
@@ -132,9 +115,9 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
         } else {
             status(
                 source === "remote"
-                    ? "Calendario actualizado desde Google Sheets. Selecciona tu nombre."
-                    : "Calendario listo. Selecciona tu nombre.",
-                "ok"
+                    ? "Calendario actualizado desde Google Sheets. Elige tu nombre para ver tus participaciones."
+                    : "Calendario listo. Elige tu nombre para ver tus participaciones.",
+                "ok",
             );
         }
     } catch (err) {
@@ -146,31 +129,30 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
                 els.persona.value = previous;
                 show(false);
             }
-            status(
-                "No se pudo actualizar. Se conservan los datos anteriores; inténtalo de nuevo.",
-                "error"
-            );
+            status("No se pudo actualizar. Se conservan los datos anteriores; inténtalo de nuevo.", "error");
         } else {
             DATA = null;
             lastRendered = null;
             els.resultados.hidden = true;
-            els.descargar.disabled = true;
-            els.destinatarioField.hidden = true;
-            els.destinatario.value = "";
+            if (els.descargarPdf) {
+                els.descargarPdf.hidden = true;
+                els.descargarPdf.disabled = true;
+            }
             els.persona.replaceChildren();
             const option = document.createElement("option");
             option.value = "";
             option.textContent = "No se pudo cargar el calendario";
             els.persona.append(option);
-            status(
-                "No se pudo cargar el calendario. Revisa tu conexión e inténtalo de nuevo.",
-                "error"
-            );
+            status("No se pudo cargar el calendario. Revisa tu conexión e inténtalo de nuevo.", "error");
         }
     } finally {
+        els.meses.removeAttribute("aria-busy");
+        if (source === "remote" && !DATA) {
+            // clear skeleton if remote failed without data
+            els.meses.replaceChildren();
+        }
         els.actualizar.disabled = false;
         els.persona.disabled = !DATA || DATA.persons.length === 0;
-        updateRecipientState(false);
     }
 }
 
@@ -194,9 +176,7 @@ function populatePersonas(): void {
     els.persona.replaceChildren();
     const placeholder = document.createElement("option");
     placeholder.value = "";
-    placeholder.textContent = DATA.persons.length
-        ? "Selecciona tu nombre…"
-        : "No hay próximas participaciones";
+    placeholder.textContent = DATA.persons.length ? "Selecciona tu nombre…" : "No hay próximas participaciones";
     els.persona.append(placeholder);
     for (const p of DATA.persons) {
         const opt = document.createElement("option");
@@ -217,8 +197,7 @@ function groupForRender(parts: Participation[], notes: Record<number, NoteInfo>)
         byDate.set(p[0], list);
     }
 
-    const rows: Array<{ dateInt: number; speeches: string[]; roles: string[]; note?: NoteInfo }> =
-        [];
+    const rows: Array<{ dateInt: number; speeches: string[]; roles: string[]; note?: NoteInfo }> = [];
     for (const [dateInt, list] of byDate) {
         const speeches: string[] = [];
         const roles: string[] = [];
@@ -242,7 +221,7 @@ function appendRow(
     items: string[],
     variant: "speech" | "role",
     noteCategory?: NoteCategory,
-    googleUrl?: string
+    googleUrl?: string,
 ): void {
     const li = document.createElement("li");
     li.className = variant === "speech" ? "item speech" : "item role";
@@ -264,9 +243,8 @@ function appendRow(
         link.rel = "noopener";
         link.setAttribute("data-tooltip", "Agregar al calendario");
         link.setAttribute("aria-label", `Agregar al calendario - ${dateLabel}`);
-        // Lucide calendar-plus (currentColor = loyal-blue #004165)
-        link.innerHTML =
-            '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h8"/><path d="M12 18v-4"/><path d="M12 14h.01"/></svg>';
+        // Phosphor calendar-plus (v2: replaces Lucide, single family)
+        link.innerHTML = '<i class="ph ph-calendar-plus" aria-hidden="true" style="font-size:18px"></i>';
         li.append(link);
     }
     ul.append(li);
@@ -349,8 +327,7 @@ function render(rows: ReturnType<typeof groupForRender>): {
         list.className = "participaciones";
         for (const row of month.rows) {
             const items = [...row.speeches, ...row.roles];
-            const summary =
-                row.speeches.length > 0 ? items.join(", ") : `Mesa de Trabajo: ${items.join(", ")}`;
+            const summary = row.speeches.length > 0 ? items.join(", ") : `Mesa de Trabajo: ${items.join(", ")}`;
             let description = items.join(", ");
             if (row.note) description += `\n\nNota: ${row.note.text}`;
             // Google template usa default 30 min; aclarar recordatorio 14d/7d del ics
@@ -362,14 +339,7 @@ function render(rows: ReturnType<typeof groupForRender>): {
                       : "Recordatorio: 7 días antes (ajusta notificación en Google Calendar)";
             description += `\n\n${reminder}`;
             const googleUrl = toGoogleCalendarUrl(row.dateInt, summary, description);
-            appendRow(
-                list,
-                eventDateLabel(row.dateInt),
-                items,
-                row.speeches.length > 0 ? "speech" : "role",
-                row.note?.category,
-                googleUrl
-            );
+            appendRow(list, eventDateLabel(row.dateInt), items, row.speeches.length > 0 ? "speech" : "role", row.note?.category, googleUrl);
         }
 
         section.append(heading, list);
@@ -377,9 +347,10 @@ function render(rows: ReturnType<typeof groupForRender>): {
     }
 
     if (months.size === 0) {
-        const empty = document.createElement("p");
+        const empty = document.createElement("div");
         empty.className = "no-results";
-        empty.textContent = "Sin participaciones próximas";
+        empty.innerHTML =
+            '<i class="ph ph-calendar-blank" aria-hidden="true" style="font-size:24px; display:block; margin-bottom:8px;"></i><p style="margin:0">Sin participaciones próximas</p><p style="margin:4px 0 0; font-size:0.88rem; color:var(--ink-soft)">Selecciona otro nombre o actualiza el calendario.</p>';
         els.meses.append(empty);
     }
 
@@ -403,17 +374,15 @@ function show(shouldFocus = true): void {
     }
     const person = els.persona.value;
     if (!person) {
-        status("Selecciona un nombre para ver tus participaciones.");
+        status("Elige tu nombre para ver tus participaciones.");
         els.resultados.hidden = true;
-        els.destinatarioField.hidden = true;
-        els.destinatario.value = "";
+        if (els.descargarPdf) {
+            els.descargarPdf.hidden = true;
+            els.descargarPdf.disabled = true;
+        }
         lastRendered = null;
-        updateRecipientState(false);
         return;
     }
-
-    els.destinatarioField.hidden = false;
-    updateRecipientState(false);
 
     const key = normalizeKey(person);
     const parts = DATA.index[key] ?? [];
@@ -421,37 +390,35 @@ function show(shouldFocus = true): void {
     const totals = render(rows);
 
     els.resultados.hidden = false;
-    els.descargar.disabled = totals.discursos + totals.roles === 0;
     lastRendered = { person, parts };
 
-    if (totals.discursos + totals.roles === 0) {
+    const hasResults = totals.discursos + totals.roles > 0;
+    if (els.descargarPdf) {
+        els.descargarPdf.hidden = !hasResults;
+        els.descargarPdf.disabled = !hasResults;
+    }
+
+    if (!hasResults) {
         status("No hay participaciones para esta persona.", "info");
     } else {
         status(`${person}: ${totals.discursos + totals.roles} participaciones próximas.`, "ok");
     }
 
-    if (shouldFocus) els.destinatario.focus({ preventScroll: false });
+    if (shouldFocus && hasResults) els.descargarPdf?.focus({ preventScroll: false });
 }
 
-function downloadIcs(): void {
-    if (!lastRendered || !DATA) return;
-    const { person, parts } = lastRendered;
-    const attendeeEmail = els.destinatario.value.trim();
-    if (!isValidEmail(attendeeEmail)) {
-        updateRecipientState(true);
-        els.destinatario.focus({ preventScroll: false });
-        return;
-    }
-
+// ICS oculto: se mantiene por compatibilidad pero sin UI (pedido: deja oculto el ICS)
+function _hiddenDownloadIcs(person: string, parts: Participation[], attendeeEmail: string, attendeeName: string): void {
+    if (!DATA) return;
     const ics = generateIcs(
         person,
         parts,
         {
             organizerEmail: ORGANIZER_EMAIL,
             attendeeEmail,
-            attendeeName: person,
+            attendeeName,
         },
-        DATA.notes
+        DATA.notes,
     );
     const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -462,7 +429,135 @@ function downloadIcs(): void {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    status(`Invitación generada para ${person}.`, "ok");
+}
+// Exponer para uso manual desde consola si se necesita
+// @ts-ignore
+(window as unknown as Record<string, unknown>)._hiddenDownloadIcs = _hiddenDownloadIcs;
+
+async function downloadPdf(): Promise<void> {
+    if (!lastRendered || !DATA) return;
+    const { person } = lastRendered;
+    const target = document.getElementById("resultados") as HTMLElement | null;
+    if (!target) return;
+    status("Generando PDF…", "info");
+    els.descargarPdf.disabled = true;
+    const wasDark = document.documentElement.classList.contains("dark");
+    try {
+        // Fix universal transparencia: desactivar dark en <html> + matar animaciones + flatten alpha
+        if (wasDark) document.documentElement.classList.remove("dark");
+        // Clonar para capturar sin hidden y con fondo blanco (header reducido 8px + h2 compacto)
+        const clone = target.cloneNode(true) as HTMLElement;
+        clone.hidden = false;
+        clone.style.position = "fixed";
+        clone.style.left = "-10000px";
+        clone.style.top = "0";
+        clone.style.width = `${target.offsetWidth || 700}px`;
+        clone.style.background = "#ffffff";
+        clone.style.backgroundColor = "#ffffff";
+        clone.style.padding = "8px 16px 16px";
+        clone.style.animation = "none";
+        clone.style.opacity = "1";
+        clone.querySelectorAll("*").forEach((el) => {
+            const h = el as HTMLElement;
+            h.style.animation = "none";
+            h.style.transition = "none";
+            if (h.style.opacity === "" || h.style.opacity === "0") h.style.opacity = "1";
+        });
+        // Compactar header clonado para quitar espacio principal
+        const h2 = clone.querySelector("#resultados-titulo") as HTMLElement | null;
+        if (h2) h2.style.marginBottom = "0.35rem";
+        const proximaEl = clone.querySelector("#proxima") as HTMLElement | null;
+        if (proximaEl) proximaEl.style.marginTop = "0.75rem";
+        document.body.appendChild(clone);
+        // Doble rAF para asegurar frame pintado sin opacity 0 (H2)
+        await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth - 20; // 10mm margen cada lado
+        const margin = 10;
+        const headerH = 18; // reducido de 22
+
+        // Header PDF compacto (solo reducir, no quitar)
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(14);
+        pdf.setTextColor(0, 65, 101);
+        pdf.text(`Toastmasters Guadalajara — ${person}`, 10, 10);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(9);
+        pdf.setTextColor(90, 90, 90);
+        const dateStr = new Intl.DateTimeFormat("es-MX", { dateStyle: "long" }).format(new Date());
+        pdf.text(`Generado: ${dateStr} · 20:00–22:00 hora de Guadalajara`, 10, 15);
+
+        // Paginación por bloques con espacio normal entre cards (no corte mid-card)
+        const toMm = (px: number) => (px * imgWidth) / clone.offsetWidth;
+        const availFirst = pageHeight - headerH - margin;
+        const availOther = pageHeight - margin * 2;
+        let used = 0;
+        let isFirst = true;
+        const blocks: HTMLElement[] = [
+            clone.querySelector("#resultados-titulo") as HTMLElement,
+            clone.querySelector("#proxima") as HTMLElement,
+            ...Array.from(clone.querySelectorAll("section.month") as NodeListOf<HTMLElement>),
+        ].filter((el) => el && !el.hidden && el.offsetHeight > 0) as HTMLElement[];
+
+        // Fallback fino: si un month es más alto que página, dividir por li.item
+        const expandedBlocks: HTMLElement[] = [];
+        for (const b of blocks) {
+            const hMm = toMm(b.offsetHeight + 8);
+            const avail = isFirst ? availFirst : availOther;
+            // Si es month y no cabe entero, expandir a sus li (mantiene espacio normal 0.5rem)
+            if (b.tagName.toLowerCase() === "section" && hMm > avail && b.querySelectorAll("li.item").length > 0) {
+                // medir heading aparte
+                const heading = b.querySelector(".month-heading") as HTMLElement | null;
+                if (heading) expandedBlocks.push(heading);
+                b.querySelectorAll("li.item").forEach((li) => expandedBlocks.push(li as HTMLElement));
+            } else {
+                expandedBlocks.push(b);
+            }
+        }
+
+        // Fondo blanco base primera página
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pageWidth, pageHeight, "F");
+
+        for (const block of expandedBlocks) {
+            const isHeading = block.classList.contains("month-heading");
+            const gap = isHeading ? 4 : 8; // espacio normal entre cards (0.5rem ≈ 8px)
+            const blockH = block.offsetHeight;
+            const blockHmm = toMm(blockH + gap);
+            const avail = isFirst ? availFirst - used : availOther - used;
+            if (blockHmm > avail) {
+                pdf.addPage();
+                pdf.setFillColor(255, 255, 255);
+                pdf.rect(0, 0, pageWidth, pageHeight, "F");
+                used = 0;
+                isFirst = false;
+            }
+            const c = await html2canvas(block, {
+                scale: 2,
+                backgroundColor: "#ffffff",
+                useCORS: true,
+                logging: false,
+            });
+            const y = (isFirst ? headerH : margin) + used;
+            const imgH = (c.height * imgWidth) / c.width;
+            pdf.addImage(c.toDataURL("image/jpeg", 1.0), "JPEG", 10, y, imgWidth, imgH);
+            used += blockHmm;
+        }
+
+        document.body.removeChild(clone);
+
+        pdf.save(`participaciones-${slug(person)}.pdf`);
+        status(`PDF generado para ${person}.`, "ok");
+    } catch (err) {
+        console.error(err);
+        status("No se pudo generar el PDF. Inténtalo de nuevo.", "error");
+    } finally {
+        if (wasDark) document.documentElement.classList.add("dark");
+        if (lastRendered) els.descargarPdf.disabled = false;
+    }
 }
 
 function slug(s: string): string {
@@ -476,26 +571,21 @@ function slug(s: string): string {
 
 function bind(): void {
     els.persona.addEventListener("change", () => {
-        els.destinatario.value = "";
         show();
     });
-    els.destinatario.addEventListener("input", () => updateRecipientState(true));
-    els.descargar.addEventListener("click", downloadIcs);
+    els.descargarPdf?.addEventListener("click", downloadPdf);
     els.actualizar.addEventListener("click", () => loadData("remote"));
 
-    // Dark/Light toggle con Lucide sun/moon (Tailwind global + a11y)
+    // Dark/Light toggle con Phosphor sun/moon (v2: single family)
     const toggle = document.getElementById("theme-toggle") as HTMLButtonElement | null;
     const applyTheme = (dark: boolean) => {
         document.documentElement.classList.toggle("dark", dark);
         localStorage.setItem("theme", dark ? "dark" : "light");
         if (toggle) {
             toggle.setAttribute("aria-pressed", String(dark));
-            toggle.setAttribute(
-                "aria-label",
-                dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"
-            );
-            const sun = toggle.querySelector(".lucide-sun") as HTMLElement | null;
-            const moon = toggle.querySelector(".lucide-moon") as HTMLElement | null;
+            toggle.setAttribute("aria-label", dark ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
+            const sun = toggle.querySelector(".ph-sun-icon") as HTMLElement | null;
+            const moon = toggle.querySelector(".ph-moon-icon") as HTMLElement | null;
             sun?.classList.toggle("hidden", dark);
             moon?.classList.toggle("hidden", !dark);
         }
