@@ -90,13 +90,20 @@ async function loadData(source: "snapshot" | "remote" = "snapshot"): Promise<voi
     status(source === "remote" ? "Actualizando desde Google Sheets…" : "Cargando calendario…");
     els.actualizar.disabled = true;
     els.persona.disabled = true;
-    // v2 skeleton (redesign: avoid generic spinner, match card shape)
+    // v2 skeleton (GPU transform, reduced-motion gated)
     if (source === "remote") {
         els.meses.replaceChildren();
-        for (let i = 0; i < 2; i++) {
-            const sk = document.createElement("div");
-            sk.className = "skeleton";
-            sk.setAttribute("aria-hidden", "true");
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            for (let i = 0; i < 2; i++) {
+                const sk = document.createElement("div");
+                sk.className = "skeleton";
+                sk.setAttribute("aria-hidden", "true");
+                els.meses.append(sk);
+            }
+        } else {
+            const sk = document.createElement("p");
+            sk.className = "status";
+            sk.textContent = "Actualizando…";
             els.meses.append(sk);
         }
         els.resultados.hidden = false;
@@ -241,13 +248,15 @@ function appendRow(
     items: string[],
     variant: "speech" | "role",
     noteCategory?: NoteCategory,
-    googleUrl?: string
+    googleUrl?: string,
+    index = 0
 ): void {
     const li = document.createElement("li");
     li.className = variant === "speech" ? "item speech" : "item role";
     if (noteCategory) {
         li.classList.add(`note-${noteCategory}`);
     }
+    li.style.setProperty("--i", String(index));
     const text = document.createElement("span");
     text.className = "text";
     text.textContent = items.join(" · ");
@@ -315,6 +324,7 @@ function render(rows: ReturnType<typeof groupForRender>): {
         r += row.roles.length;
     }
 
+    let globalIdx = 0;
     for (const month of months.values()) {
         const section = document.createElement("section");
         section.className = "month";
@@ -367,7 +377,8 @@ function render(rows: ReturnType<typeof groupForRender>): {
                 items,
                 row.speeches.length > 0 ? "speech" : "role",
                 row.note?.category,
-                googleUrl
+                googleUrl,
+                globalIdx++
             );
         }
 
