@@ -37,16 +37,16 @@
                 --z-sticky: 20;
                 --z-tooltip: 30;
                 --z-modal: 40;
-                --note-festividad-bg: #f3e5f5;
-                --note-festividad-text: #6a1b9a;
-                --note-feriado-bg: #e1bee7;
-                --note-feriado-text: #7b1fa2;
-                --note-tematico-bg: #ce93d8;
-                --note-tematico-text: #8e24aa;
-                --note-oficial-bg: #9c27b0;
-                --note-oficial-text: #ffffff;
-                --note-atipica-bg: #7b1fa2;
-                --note-atipica-text: #ffffff;
+                --note-festividad-bg: #f5ece8;
+                --note-festividad-text: #6d3440;
+                --note-feriado-bg: #ece8e6;
+                --note-feriado-text: #5a3c52;
+                --note-tematico-bg: #e8e0e6;
+                --note-tematico-text: #4d2f4a;
+                --note-oficial-bg: #e0d6e2;
+                --note-oficial-text: #4a2148;
+                --note-atipica-bg: #dccfd9;
+                --note-atipica-text: #3d1e3b;
                 --font-heading: "Montserrat", Arial, "Segoe UI", sans-serif;
                 --font-body: "Source Sans 3", Arial, "Segoe UI", sans-serif;
                 color-scheme: light;
@@ -684,15 +684,30 @@
                 opacity: 1;
                 transform: translateX(-50%) translateY(0);
             }
-            li.note-atipica .icon-btn,
-            li.note-oficial .icon-btn {
-                background: var(--note-atipica-bg);
-                color: #fff;
-                border-color: var(--note-atipica-text);
-            }
             li.note-festividad .icon-btn {
                 background: var(--note-festividad-bg);
                 color: var(--note-festividad-text);
+                border-color: var(--note-festividad-text);
+            }
+            li.note-feriado .icon-btn {
+                background: var(--note-feriado-bg);
+                color: var(--note-feriado-text);
+                border-color: var(--note-feriado-text);
+            }
+            li.note-tematico .icon-btn {
+                background: var(--note-tematico-bg);
+                color: var(--note-tematico-text);
+                border-color: var(--note-tematico-text);
+            }
+            li.note-oficial .icon-btn {
+                background: var(--note-oficial-bg);
+                color: var(--note-oficial-text);
+                border-color: var(--note-oficial-text);
+            }
+            li.note-atipica .icon-btn {
+                background: var(--note-atipica-bg);
+                color: var(--note-atipica-text);
+                border-color: var(--note-atipica-text);
             }
             /* Hover invertido para notas (efecto visible en atipica) */
             li.note-atipica .icon-btn:hover,
@@ -826,10 +841,10 @@
 html.dark {
   color-scheme: dark;
   --fair-gray: #0f1a21;
-  --card: #1e2f3d;
+  --card: #1c2e3b;
   --ink: #e6eef4;
-  --ink-soft: #b5c2cc;
-  --border: #2a3a45;
+  --ink-soft: #c6d3dc;
+  --border: #304352;
   --focus: #f2df74;
 }
 html.dark body {
@@ -878,25 +893,29 @@ html.dark .badge--role {
   border: 1px solid rgba(169, 210, 240, 0.25);
 }
 html.dark .badge--note.festividad {
-  background: rgba(243, 229, 245, 0.18);
-  color: #e1bee7;
-  border: 1px solid rgba(225, 190, 231, 0.3);
+  background: #2e2a33;
+  color: #e8d5e8;
+  border: 1px solid rgba(232, 213, 232, 0.3);
 }
 html.dark .badge--note.feriado {
-  background: rgba(225, 190, 231, 0.22);
-  color: #e1bee7;
+  background: #322a32;
+  color: #e8d5e8;
+  border: 1px solid rgba(232, 213, 232, 0.28);
 }
 html.dark .badge--note.tematico {
-  background: rgba(206, 147, 216, 0.2);
-  color: #e1bee7;
+  background: #362a36;
+  color: #e8d5e8;
+  border: 1px solid rgba(232, 213, 232, 0.26);
 }
 html.dark .badge--note.oficial {
-  background: rgba(156, 39, 176, 0.28);
-  color: #f3e5f5;
+  background: #3a253a;
+  color: #f0d8f0;
+  border: 1px solid rgba(240, 216, 240, 0.3);
 }
 html.dark .badge--note.atipica {
-  background: rgba(123, 31, 162, 0.32);
-  color: #f3e5f5;
+  background: #3e233e;
+  color: #f0d8f0;
+  border: 1px solid rgba(240, 216, 240, 0.28);
 }
 html.dark ul.participaciones li.speech {
   background: #2d1f26;
@@ -914,22 +933,37 @@ html.dark ul.participaciones li .text {
 html.dark ul.participaciones li .date {
   color: #b5c2cc;
 }
-html.dark ul.participaciones li.note-festividad,
-html.dark ul.participaciones li.note-feriado,
-html.dark ul.participaciones li.note-tematico,
-html.dark ul.participaciones li.note-oficial,
+html.dark ul.participaciones li.note-festividad {
+  background: #2e2a33;
+  border-color: #5a3c52;
+}
+html.dark ul.participaciones li.note-feriado {
+  background: #322a32;
+  border-color: #5a3c52;
+}
+html.dark ul.participaciones li.note-tematico {
+  background: #362a36;
+  border-color: #4d2f4a;
+}
+html.dark ul.participaciones li.note-oficial {
+  background: #3a253a;
+  border-color: #4a2148;
+}
 html.dark ul.participaciones li.note-atipica {
-  border-width: 1px;
+  background: #3e233e;
+  border-color: #3d1e3b;
 }
 html.dark ul.participaciones li.note-festividad .text,
-html.dark ul.participaciones li.note-festividad .date {
-  color: #f3e5f5;
-}
+html.dark ul.participaciones li.note-festividad .date,
+html.dark ul.participaciones li.note-feriado .text,
+html.dark ul.participaciones li.note-feriado .date,
+html.dark ul.participaciones li.note-tematico .text,
+html.dark ul.participaciones li.note-tematico .date,
 html.dark ul.participaciones li.note-oficial .text,
 html.dark ul.participaciones li.note-oficial .date,
 html.dark ul.participaciones li.note-atipica .text,
 html.dark ul.participaciones li.note-atipica .date {
-  color: #f3e5f5;
+  color: #f0d8f0;
 }
 html.dark .icon-btn {
   background: #0f1a21;
@@ -943,7 +977,7 @@ html.dark .icon-btn:focus-visible {
   border-color: var(--loyal-blue);
 }
 html.dark .skeleton {
-  background: linear-gradient(90deg, #1e2f3d 25%, #0f1a21 50%, #1e2f3d 75%);
+  background: linear-gradient(90deg, #1c2e3b 25%, #0f1a21 50%, #1c2e3b 75%);
   background-size: 200% 100%;
 }
 html.dark .meta,
